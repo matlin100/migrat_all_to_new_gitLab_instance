@@ -59,4 +59,3 @@ while page:
 
 print("All projects have been attempted to clone.")
 
-
