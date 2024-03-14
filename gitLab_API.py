@@ -121,4 +121,43 @@ def get_all_groups_users_from_new_gitLab():
 def get_alL_old_projects():
     return fetch_from_gitlab(f"{source_gitlab_api}projects", headers=source_headers)
 
+def fetch_merge_requests(project_id):
+    """
+    Fetch merge requests for a given project ID from the source GitLab instance.
 
+    Args:
+    - project_id: The ID of the project for which to fetch merge requests.
+
+    Returns:
+    - A list of merge requests.
+    """
+    merge_requests_url = f"{source_gitlab_api}projects/{project_id}/merge_requests"
+    merge_requests = requests.get(merge_requests_url, source_headers)
+    return merge_requests
+
+
+def migrate_merge_requests(merge_requests, target_project_id):
+    """
+    Migrates merge requests from a source project to a target project.
+
+    Parameters:
+    - merge_requests: List of merge requests from the source project.
+    - target_project_id: ID of the target project in the new GitLab instance.
+    """
+    for mr in merge_requests:
+        mr_data = {
+            'source_branch': mr['source_branch'],
+            'target_branch': mr['target_branch'],
+            'title': mr['title'],
+            'description': mr['description'],
+            'state': mr['state'],
+            # Add any other fields you need to migrate
+        }
+
+        # Creating the merge request in the target project
+        response = post_to_gitlab(f"{target_gitlab_api}projects/{target_project_id}/merge_requests", target_headers, mr_data)
+
+        if response:
+            print(f"Merge request '{mr['title']}' migrated successfully.")
+        else:
+            print(f"Failed to migrate merge request '{mr['title']}'.")

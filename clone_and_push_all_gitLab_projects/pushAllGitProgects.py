@@ -1,10 +1,5 @@
-import requests
-import os
 from gitLab_API import *
-import subprocess
 import json
-
-
 import subprocess
 import os
 import re

@@ -1,5 +1,5 @@
 from gitLab_API import *
-from migate_users_to_groups import #
+from migate_users_to_groups import *
 # Migration Functions with Enhanced Progress Tracking
 def migrate_users():
     users = fetch_from_gitlab(f"{source_gitlab_api}users", source_headers)
@@ -84,15 +84,13 @@ def migrate_projects():
 # Main function to run migrations with summary
 def main():
     try:
-        # migrate_users()
-        # migrate_groups()
-        # migrate_projects()
+        migrate_users()
+        migrate_groups()
+        migrate_projects()
         print("\nMigration completed successfully.")
-        #print(f"Total users migrated: {migration_progress['users']['migrated']}/{migration_progress['users']['total']}")
-        #print(f"Total groups migrated: {migration_progress['groups']['migrated']}/{migration_progress['groups']['total']}")
+        print(f"Total users migrated: {migration_progress['users']['migrated']}/{migration_progress['users']['total']}")
+        print(f"Total groups migrated: {migration_progress['groups']['migrated']}/{migration_progress['groups']['total']}")
         print(f"Total projects migrated: {migration_progress['projects']['migrated']}/{migration_progress['projects']['total']}")
     except Exception as e:
         print(f"Migration error: {e}")
 
-if __name__ == '__main__':
-    main()
