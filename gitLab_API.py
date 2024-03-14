@@ -124,7 +124,6 @@ def get_alL_old_projects():
 def fetch_merge_requests(project_id):
     """
     Fetch merge requests for a given project ID from the source GitLab instance.
-
     Args:
     - project_id: The ID of the project for which to fetch merge requests.
 
@@ -153,10 +152,8 @@ def migrate_merge_requests(merge_requests, target_project_id):
             'state': mr['state'],
             # Add any other fields you need to migrate
         }
-
         # Creating the merge request in the target project
         response = post_to_gitlab(f"{target_gitlab_api}projects/{target_project_id}/merge_requests", target_headers, mr_data)
-
         if response:
             print(f"Merge request '{mr['title']}' migrated successfully.")
         else:

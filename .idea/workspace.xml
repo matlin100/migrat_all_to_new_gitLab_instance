@@ -5,21 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bddcee30-b9a7-495e-afa7-449671a720f8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/cloneAllGitLab.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cloneAllGitLab.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clone_and_push_all_gitLab_projects/pushAllGitProgects.py" beforeDir="false" afterPath="$PROJECT_DIR$/clone_and_push_all_gitLab_projects/pushAllGitProgects.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/create_new_repo.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_new_repo.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gitLab_API.py" beforeDir="false" afterPath="$PROJECT_DIR$/gitLab_API.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/passAllUsersAndGroupsToNewGitlab.py" beforeDir="false" afterPath="$PROJECT_DIR$/passAllUsersAndGroupsToNewGitlab.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requests_package/certifi-2024.2.2-py3-none-any.whl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requests_package/charset_normalizer-3.3.2-cp312-cp312-macosx_10_9_x86_64.whl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requests_package/idna-3.6-py3-none-any.whl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requests_package/requests-2.31.0-py3-none-any.whl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/requests_package/urllib3-2.2.1-py3-none-any.whl" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
