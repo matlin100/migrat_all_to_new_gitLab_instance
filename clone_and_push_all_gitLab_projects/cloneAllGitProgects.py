@@ -6,7 +6,7 @@ gitlab_token = 'DtdsoPoysuNAs4SeFmyb'
 
 
 # Set the directory where you want to clone all the projects
-clone_directory = r"S:\TeamFolders\Yechezkel\gitclone"
+clone_directory = r"S:\TeamFolders\Yechezkel\gitclone6"
 if not os.path.exists(clone_directory):
     os.makedirs(clone_directory)
 

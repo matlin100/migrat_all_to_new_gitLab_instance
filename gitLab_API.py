@@ -51,8 +51,9 @@ def post_to_gitlab(url, headers, data):
             return response.json()
         elif response.status_code == 409:
             print(f"skipping migration for  due to conflict ")
-            return None
+            return response.json()
         else:
+            return response.json()
             raise Exception(f"Failed to post data: {response.status_code}, {response.text}")
 
 def sanitize_namespace_path(path):
@@ -63,9 +64,6 @@ def sanitize_path(path):
     counter = 0
     path = re.sub(r'^[^a-zA-Z0-9]+[^a-zA-Z0-9]+$', '', path)
     path2 = re.sub(r'[^a-zA-Z0-9]+', '_', path)
-    if(path != path2):
-        counter = counter + 1
-        print(f"{counter} :  {path2} > {path}")
     return path2
 
 def update_progress(entity_type):

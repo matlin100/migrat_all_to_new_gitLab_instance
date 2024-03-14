@@ -17,19 +17,16 @@ for project in old_projects:
 
     if project['name'] not in new_projects_path_name:
         # Create a new project in the new GitLab instance with the same details
+        path = sanitize_path(project['path'])
+        name = sanitize_path(project['name'])
         print(f"{project['name']} id { project['namespace']['id']}")
+        print(f'{name} is the new name')
         new_project_data = {
-            'name': project['name'],
-            'path': project['path'],
+            'name': name,
+            'path': path,
             'namespace_id': project['namespace']['id'],  # You may need to map old namespace ID to new namespace ID
-            'description': project['description'],
             'visibility': project['visibility'],
             'merge_requests_enabled': project['merge_requests_enabled'],
-            'issues_enabled': project['issues_enabled'],
-            'wiki_enabled': project['wiki_enabled'],
-            'jobs_enabled': project['jobs_enabled'],
-            'snippets_enabled': project['snippets_enabled'],
-            # Add other settings you need to replicate
         }
         time.sleep(1)
         # Create the project in the new GitLab
@@ -38,7 +35,7 @@ for project in old_projects:
             print(f'Created new project: {project["name"]}')
             success.append(project['name'])
         else:
-            print(f"failed to Created new project: {project['name']} status code {res} .")
+            print(f"failed to Created new project: {project['name']} status code{res.status_code} > {res.text} ")
             print(new_project_data)
             failed.append(project['name'])
     else:

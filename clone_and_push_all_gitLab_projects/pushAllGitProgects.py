@@ -1,75 +1,117 @@
-import os.path
-
+import requests
+import os
 from gitLab_API import *
 import subprocess
+import json
 
+
+import subprocess
+import os
+import re
+import requests
+
+# Configuration: Update these variables with your information
+base_gitlab_url = 'http://gitlab16.pituah.iaf/'
+target_gitlab_api = target_gitlab_api
+headers = target_headers
 clone_directory = r"S:\TeamFolders\Yechezkel\gitclone"
-new_gitlab_token = "glpat-2rdgXRKZd3xz4fHw6xwF"
-
-def get_namespace_mapping():
-    old_projects = get_alL_old_projects()
-    new_groups = get_all_groups_users_from_new_gitLab()
-
-
-    namespace_mapping = {}
-    for project in old_projects:
-        old_namespace = project['namespace']['name']
-        if old_namespace in new_groups:
-            namespace_mapping[project['name']] = new_groups[old_namespace]
-        else:
-            print(f"no matching namespace fund for {old_namespace} in the new git lab")
-    return namespace_mapping
-
-
-
-def get_old_repo_visibility():
-    """Retrieve the visibility of a repository from the old GitLab instance."""
-    url = f"{source_gitlab_api}projects/{repo_name.replace(' ', '%20')}"  # URL encode spaces
-    response = requests.get(url, headers=source_headers)
-    if response.status_code == 200:
-        return response['visibility']
-    else:
-        print(f"Failed to retrieve visibility for repository {repo_name}. Response: {response.text}")
-        return 'private'  # Default to private if unable to fetch
-
-def create_new_repository(repo_name, namespace_id, visibility):
-    """Create a new repository on the new GitLab instance with the specified visibility."""
-    url = f"{target_gitlab_api}/api/v4/projects"
-    payload = {
-        'name': repo_name,
-        'namespace_id': namespace_id,
-        'visibility': visibility
+log_file = r"C:\Users\matlin\PycharmProjects\cloneAllGitLab\logs\push_to_taget_log.json"
+def log_event(log_file, project_name, status, message=None, error=None):
+    log_entry = {
+        "project_name": project_name,
+        "status": status,
+        "message": message,
+        "error": error
     }
-    response = requests.post(url, headers=target_headers, data=payload)
-    if response.status_code == 201:
-        print(f"Repository {repo_name} created on new GitLab instance with {visibility} visibility.")
-        return response['http_url_to_repo']
+    try:
+        with open(log_file, 'a') as file:
+            json.dump(log_entry, file)
+            file.write('\n')
+    except IOError as e:
+        print(f'error loding event: {e}')
+
+
+def get_namespace_and_project_from_git_remote(repo_path):
+    """Get the namespace and project name from a Git repository's remote URL."""
+    os.chdir(repo_path)
+    try:
+        remote_url = subprocess.check_output(['git', 'remote', 'get-url', 'origin'], text=True).strip()
+    except subprocess.CalledProcessError:
+        print("Error getting the remote URL. Is 'origin' set up?")
+        return None, None
+    match = re.search(r'[:/]([^:/]+)/([^/]+)\.git$', remote_url)
+    if match:
+        namespace = match.group(1)
+        project_name = match.group(2)
+        return namespace, project_name
     else:
-        print(f"Failed to create repository {repo_name}. Response: {response.text}")
+        print("Unable to parse namespace and project name from the remote URL.")
+        return None, None
+
+def project_exists(namespace, project_name):
+    """Check if the project exists on GitLab."""
+    response = requests.get(f"{target_gitlab_api}projects/{namespace}%2F{project_name}", headers=headers)
+    if response.status_code == 200:
+        return True, response.json()['http_url_to_repo']
+    return False, None
+
+def create_project(namespace_id, project_name):
+    """Create a project on GitLab."""
+    data = {'name': project_name, 'namespace_id': namespace_id, 'visibility': 'private'}
+    response = requests.post(f"{target_gitlab_api}projects", headers=headers, json=data)
+    if response.status_code in [201, 200]:
+        print(f"Project {project_name} created successfully.")
+        return response.json()['http_url_to_repo']
+    else:
+        print(f"Failed to create project {project_name}. Response: {response.json()}")
         return None
 
-def push_repo_to_new_instance(local_path, new_remote_url):
-    """Push all branches and tags from the local repository to the new GitLab instance."""
-    os.chdir(local_path)
-    subprocess.run(['git', 'remote', 'add', 'new-origin', new_remote_url], check=True)
-    subprocess.run(['git', 'push', '--all', 'new-origin'], check=True)
-    subprocess.run(['git', 'push', '--tags', 'new-origin'], check=True)
+def get_namespace_id(namespace):
+    """Get the namespace ID from GitLab by its name."""
+    response = requests.get(f"{target_gitlab_api}namespaces?search={namespace}", headers=headers)
+    if response.status_code == 200 and response.json() or response.status_code == 201 and response.json():
+        return response.json()[0]['id']
+    else:
+        print(f"Failed to find namespace {namespace}.")
+        return None
 
-# Main script
+def create_or_get_project(namespace, project_name):
+    """Check if a project exists on GitLab, and create it if it does not."""
+    exists, gitlab_project_url = project_exists(namespace, project_name)
+    if exists:
+        print(f"Project {project_name} exists. Using existing URL.")
+        return gitlab_project_url
+
+    namespace_id = get_namespace_id(namespace)
+    if namespace_id:
+        return create_project(namespace_id, project_name)
+    else:
+        return None
+
+def push_to_project(repo_path, gitlab_project_url, project_name):
+    """Push the local project to the GitLab project URL."""
+    print(f"start Pushing to {gitlab_project_url}")
+    os.chdir(repo_path)
+    try:
+        subprocess.run(['git', 'remote', 'remove', 'origin'], check=False)
+        subprocess.run(['git', 'remote', 'add', 'origin', gitlab_project_url], check=True)
+        subprocess.run(['git', 'push', '--all', 'origin'], check=True)
+        subprocess.run(['git', 'push', '--tags', 'origin'], check=True)
+        log_event(log_file=log_file, project_name=project_name, status="success",  error=f'no error success push {project_name}')
+        print(f'successfully push {project_name}')
+    except subprocess.CalledProcessError as e:
+        log_event(log_file=log_file, project_name=project_name, status="failure", error=str(e))
+        print(f'Failed to  push {project_name}')
+def process_projects(clone_directory):
+    """Process each project in the clone directory."""
+    for project_dir in os.listdir(clone_directory):
+        full_path = os.path.join(clone_directory, project_dir)
+        if os.path.isdir(full_path):
+            namespace, project_name = get_namespace_and_project_from_git_remote(full_path)
+            if namespace and project_name:
+                gitlab_project_url = create_or_get_project(namespace, project_name)
+                if gitlab_project_url:
+                    push_to_project(full_path, gitlab_project_url, project_name)
+
 if __name__ == "__main__":
-    namespace_mapping = get_namespace_mapping()
-    repos = [d for d in os.listdir(clone_directory) if os.path.isdir(os.path.join(clone_directory, d))]
-    for repo_name in repos:
-        if repo_name in namespace_mapping:
-            namespace_id = namespace_mapping[repo_name]
-            old_visibility = get_old_repo_visibility(repo_name)  # Retrieve old repo visibility
-            repo_path = os.path.join(clone_directory, repo_name)
-            print(f"repo_name {repo_name}")
-            print(f"namespace_id :{ namespace_id}")
-            new_repo_url = create_new_repository(repo_name, namespace_id, old_visibility)
-            if new_repo_url:
-                new_repo_url_with_token = new_repo_url.replace('https://', f'https://oauth2:{new_gitlab_token}@')
-                print(f"new_repo_url_with_token : {new_repo_url_with_token}")
-                push_repo_to_new_instance(repo_path, new_repo_url_with_token)
-        else:
-            print(f"No namespace mapping found for {repo_name}, skipping...")
+    process_projects(clone_directory)
